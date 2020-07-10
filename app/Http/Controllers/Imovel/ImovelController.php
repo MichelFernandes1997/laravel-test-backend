@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateImovelRequest;
 use App\Http\Resources\ImovelCollection;
+use Illuminate\Support\Facades\Input;
 use App\Imovel;
 
 class ImovelController extends Controller
@@ -15,11 +16,26 @@ class ImovelController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $imoveis = Imovel::orderByDesc('id')->paginate('8');
         
         return new ImovelCollection($imoveis);
+    }
+
+    /**
+     * Display a listing of the resource with orderBy especific attribute.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderBy($order)
+    {
+        $search = explode(',', $order);
+        
+        $ordered = Imovel::orderBy($search[0], $search[1])->paginate('8');
+
+        return new ImovelCollection($ordered);
     }
 
     /**

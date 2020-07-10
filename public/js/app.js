@@ -1910,7 +1910,9 @@ module.exports = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _Modal_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Modal.vue */ "./resources/js/components/Modal.vue");
+/* harmony import */ var sort_by__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! sort-by */ "./node_modules/sort-by/index.js");
+/* harmony import */ var sort_by__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(sort_by__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _Modal_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Modal.vue */ "./resources/js/components/Modal.vue");
 //
 //
 //
@@ -1972,6 +1974,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 
 Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
   position: 'bottom-right',
@@ -1982,7 +1985,7 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['csrf_token'],
   components: {
-    modal: _Modal_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
+    modal: _Modal_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   data: function data() {
     return {
@@ -2000,7 +2003,11 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
         deleted_at: ''
       },
       isModalVisible: false,
-      pagination: {}
+      pagination: {},
+      order: {
+        name: '',
+        order_by: ''
+      }
     };
   },
   created: function created() {
@@ -2047,10 +2054,9 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
           headers: {
             'X-CSRF-Token': this.csrf_token
           }
-        }).then(function (ressult) {
-          console.log(ressult.json());
+        }).then(function (res) {
+          return res.json();
         }).then(function (data) {
-          //alert('Imóvel removido!');
           _this2.$toasted.success('Imóvel deletado com sucesso');
 
           _this2.fetchImoveis();
@@ -2058,6 +2064,44 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
           return console.log(err);
         });
       }
+    },
+    orderBy: function orderBy(value) {
+      var _this3 = this;
+
+      if (this.order.order_by === '') {
+        this.order = {
+          name: value,
+          order_by: 'desc'
+        };
+      } else if (this.order.order_by === 'desc') {
+        this.order = {
+          name: value,
+          order_by: 'asc'
+        };
+      } else {
+        this.order = {
+          name: value,
+          order_by: 'desc'
+        };
+      }
+
+      fetch('/imovel/list/' + this.order.name + ',' + this.order.order_by, {
+        method: 'GET',
+        headers: {
+          'content-type': 'application/json',
+          'X-CSRF-Token': this.csrf_token
+        },
+        dataType: 'json'
+      }).then(function (res) {
+        return res.json();
+      }).then(function (res) {
+        _this3.imoveis = res.data;
+
+        _this3.paginacao(res.meta, res.links);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+      console.log(this.order);
     },
     showModal: function showModal() {
       this.isModalVisible = true;
@@ -37907,6 +37951,340 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/sort-by/index.js":
+/*!***************************************!*\
+  !*** ./node_modules/sort-by/index.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var objectPath = __webpack_require__(/*! object-path */ "./node_modules/sort-by/node_modules/object-path/index.js");
+var sortBy;
+var sort;
+var type;
+
+/**
+ * Filters args based on their type
+ * @param  {String} type Type of property to filter by
+ * @return {Function}
+ */
+type = function(type) {
+    return function(arg) {
+        return typeof arg === type;
+    };
+};
+
+/**
+ * Return a comparator function
+ * @param  {String} property The key to sort by
+ * @param  {Function} map Function to apply to each property
+ * @return {Function}        Returns the comparator function
+ */
+sort = function sort(property, map) {
+    var sortOrder = 1;
+    var apply = map || function(_, value) { return value };
+
+    if (property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+
+    return function fn(a,b) {
+        var result;
+        var am = apply(property, objectPath.get(a, property));
+        var bm = apply(property, objectPath.get(b, property));
+        if (am < bm) result = -1;
+        if (am > bm) result = 1;
+        if (am === bm) result = 0;
+        return result * sortOrder;
+    }
+};
+
+/**
+ * Return a comparator function that sorts by multiple keys
+ * @return {Function} Returns the comparator function
+ */
+sortBy = function sortBy() {
+
+    var args = Array.prototype.slice.call(arguments);
+    var properties = args.filter(type('string'));
+    var map = args.filter(type('function'))[0];
+
+    return function fn(obj1, obj2) {
+        var numberOfProperties = properties.length,
+            result = 0,
+            i = 0;
+
+        /* try getting a different result from 0 (equal)
+         * as long as we have extra properties to compare
+         */
+        while(result === 0 && i < numberOfProperties) {
+            result = sort(properties[i], map)(obj1, obj2);
+            i++;
+        }
+        return result;
+    };
+};
+
+/**
+ * Expose `sortBy`
+ * @type {Function}
+ */
+module.exports = sortBy;
+
+/***/ }),
+
+/***/ "./node_modules/sort-by/node_modules/object-path/index.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/sort-by/node_modules/object-path/index.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory){
+  'use strict';
+
+  /*istanbul ignore next:cant test*/
+  if ( true && typeof module.exports === 'object') {
+    module.exports = factory();
+  } else if (true) {
+    // AMD. Register as an anonymous module.
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else {}
+})(this, function(){
+  'use strict';
+
+  var
+    toStr = Object.prototype.toString,
+    _hasOwnProperty = Object.prototype.hasOwnProperty;
+
+  function isEmpty(value){
+    if (!value) {
+      return true;
+    }
+    if (isArray(value) && value.length === 0) {
+      return true;
+    } else {
+      for (var i in value) {
+        if (_hasOwnProperty.call(value, i)) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  function toString(type){
+    return toStr.call(type);
+  }
+
+  function isNumber(value){
+    return typeof value === 'number' || toString(value) === "[object Number]";
+  }
+
+  function isString(obj){
+    return typeof obj === 'string' || toString(obj) === "[object String]";
+  }
+
+  function isObject(obj){
+    return typeof obj === 'object' && toString(obj) === "[object Object]";
+  }
+
+  function isArray(obj){
+    return typeof obj === 'object' && typeof obj.length === 'number' && toString(obj) === '[object Array]';
+  }
+
+  function isBoolean(obj){
+    return typeof obj === 'boolean' || toString(obj) === '[object Boolean]';
+  }
+
+  function getKey(key){
+    var intKey = parseInt(key);
+    if (intKey.toString() === key) {
+      return intKey;
+    }
+    return key;
+  }
+
+  function set(obj, path, value, doNotReplace){
+    if (isNumber(path)) {
+      path = [path];
+    }
+    if (isEmpty(path)) {
+      return obj;
+    }
+    if (isString(path)) {
+      return set(obj, path.split('.'), value, doNotReplace);
+    }
+    var currentPath = getKey(path[0]);
+
+    if (path.length === 1) {
+      var oldVal = obj[currentPath];
+      if (oldVal === void 0 || !doNotReplace) {
+        obj[currentPath] = value;
+      }
+      return oldVal;
+    }
+
+    if (obj[currentPath] === void 0) {
+      if (isNumber(currentPath)) {
+        obj[currentPath] = [];
+      } else {
+        obj[currentPath] = {};
+      }
+    }
+
+    return set(obj[currentPath], path.slice(1), value, doNotReplace);
+  }
+
+  function del(obj, path) {
+    if (isNumber(path)) {
+      path = [path];
+    }
+
+    if (isEmpty(obj)) {
+      return void 0;
+    }
+
+    if (isEmpty(path)) {
+      return obj;
+    }
+    if(isString(path)) {
+      return del(obj, path.split('.'));
+    }
+
+    var currentPath = getKey(path[0]);
+    var oldVal = obj[currentPath];
+
+    if(path.length === 1) {
+      if (oldVal !== void 0) {
+        if (isArray(obj)) {
+          obj.splice(currentPath, 1);
+        } else {
+          delete obj[currentPath];
+        }
+      }
+    } else {
+      if (obj[currentPath] !== void 0) {
+        return del(obj[currentPath], path.slice(1));
+      }
+    }
+
+    return obj;
+  }
+
+  var objectPath = {};
+
+  objectPath.ensureExists = function (obj, path, value){
+    return set(obj, path, value, true);
+  };
+
+  objectPath.set = function (obj, path, value, doNotReplace){
+    return set(obj, path, value, doNotReplace);
+  };
+
+  objectPath.insert = function (obj, path, value, at){
+    var arr = objectPath.get(obj, path);
+    at = ~~at;
+    if (!isArray(arr)) {
+      arr = [];
+      objectPath.set(obj, path, arr);
+    }
+    arr.splice(at, 0, value);
+  };
+
+  objectPath.empty = function(obj, path) {
+    if (isEmpty(path)) {
+      return obj;
+    }
+    if (isEmpty(obj)) {
+      return void 0;
+    }
+
+    var value, i;
+    if (!(value = objectPath.get(obj, path))) {
+      return obj;
+    }
+
+    if (isString(value)) {
+      return objectPath.set(obj, path, '');
+    } else if (isBoolean(value)) {
+      return objectPath.set(obj, path, false);
+    } else if (isNumber(value)) {
+      return objectPath.set(obj, path, 0);
+    } else if (isArray(value)) {
+      value.length = 0;
+    } else if (isObject(value)) {
+      for (i in value) {
+        if (_hasOwnProperty.call(value, i)) {
+          delete value[i];
+        }
+      }
+    } else {
+      return objectPath.set(obj, path, null);
+    }
+  };
+
+  objectPath.push = function (obj, path /*, values */){
+    var arr = objectPath.get(obj, path);
+    if (!isArray(arr)) {
+      arr = [];
+      objectPath.set(obj, path, arr);
+    }
+
+    arr.push.apply(arr, Array.prototype.slice.call(arguments, 2));
+  };
+
+  objectPath.coalesce = function (obj, paths, defaultValue) {
+    var value;
+
+    for (var i = 0, len = paths.length; i < len; i++) {
+      if ((value = objectPath.get(obj, paths[i])) !== void 0) {
+        return value;
+      }
+    }
+
+    return defaultValue;
+  };
+
+  objectPath.get = function (obj, path, defaultValue){
+    if (isNumber(path)) {
+      path = [path];
+    }
+    if (isEmpty(path)) {
+      return obj;
+    }
+    if (isEmpty(obj)) {
+      return defaultValue;
+    }
+    if (isString(path)) {
+      return objectPath.get(obj, path.split('.'), defaultValue);
+    }
+
+    var currentPath = getKey(path[0]);
+
+    if (path.length === 1) {
+      if (obj[currentPath] === void 0) {
+        return defaultValue;
+      }
+      return obj[currentPath];
+    }
+
+    return objectPath.get(obj[currentPath], path.slice(1), defaultValue);
+  };
+
+  objectPath.del = function(obj, path) {
+    return del(obj, path);
+  };
+
+  return objectPath;
+});
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Modal.vue?vue&type=style&index=0&lang=css&":
 /*!***************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Modal.vue?vue&type=style&index=0&lang=css& ***!
@@ -38536,14 +38914,68 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "container" }, [
+  return _c("div", { staticClass: "container-fluid" }, [
     _c("div", { staticClass: "row justify-content-center" }, [
       _c("div", { staticClass: "col-sm" }, [
         _c(
           "div",
           { staticClass: "card mt-2" },
           [
-            _vm._m(0),
+            _c("div", { staticClass: "card-header bg-dark text-white-50" }, [
+              _c("div", { staticClass: "row" }, [
+                _c("div", { staticClass: "col-4 col-sm-4" }, [
+                  _vm._v("Email do Proprietário "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-outline-secondary",
+                      on: {
+                        click: function($event) {
+                          return _vm.orderBy("emailProprietario")
+                        }
+                      }
+                    },
+                    [_vm._v("order")]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-5 col-sm-4" }, [
+                  _vm._v("Endereço "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-outline-secondary",
+                      on: {
+                        click: function($event) {
+                          return _vm.orderBy("rua")
+                        }
+                      }
+                    },
+                    [_vm._v("order")]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-2 col-sm-2" }, [
+                  _vm._v("Status "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-outline-secondary",
+                      on: {
+                        click: function($event) {
+                          return _vm.orderBy("status")
+                        }
+                      }
+                    },
+                    [_vm._v("order")]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-1 col-sm-2 text-center" }, [
+                  _vm._v("Ações")
+                ])
+              ])
+            ]),
             _vm._v(" "),
             _vm._l(_vm.imoveis, function(imovel) {
               return _c("div", { key: imovel.id, staticClass: "card-body" }, [
@@ -38723,28 +39155,7 @@ var render = function() {
     ])
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "card-header bg-dark text-white-50" }, [
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "col-4 col-sm-4 " }, [
-          _vm._v("Email do Proprietário")
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-5 col-sm-4" }, [_vm._v("Endereço")]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-2 col-sm-2" }, [_vm._v("Status")]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-1 col-sm-2 text-center" }, [
-          _vm._v("Ações")
-        ])
-      ])
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 

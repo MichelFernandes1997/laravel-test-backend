@@ -18,4 +18,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/imovel/list/{order}', 'Imovel\ImovelController@orderBy');
+
 Route::resource('imovel', ImovelController::class);

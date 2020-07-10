@@ -1,13 +1,13 @@
 <template>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-sm">
                 <div class="card mt-2">
                     <div class="card-header bg-dark text-white-50">
                         <div class="row">
-                            <div class="col-4 col-sm-4 ">Email do Proprietário</div>
-                            <div class="col-5 col-sm-4">Endereço</div>
-                            <div class="col-2 col-sm-2">Status</div>
+                            <div class="col-4 col-sm-4">Email do Proprietário <button class="btn btn-outline-secondary" @click="orderBy('emailProprietario')">order</button></div>
+                            <div class="col-5 col-sm-4">Endereço <button class="btn btn-outline-secondary" @click="orderBy('rua')">order</button></div>
+                            <div class="col-2 col-sm-2">Status <button class="btn btn-outline-secondary" @click="orderBy('status')">order</button></div>
                             <div class="col-1 col-sm-2 text-center">Ações</div>
                         </div>
                     </div>
@@ -62,6 +62,8 @@
 <script>
 import Toasted from 'vue-toasted';
 
+import sortBy from 'sort-by';
+
 Vue.use(Toasted, { position: 'bottom-right', duration: 5000, theme: 'toasted-primary' });
 
 import modal from './Modal.vue';
@@ -92,6 +94,10 @@ import modal from './Modal.vue';
                 },
                 isModalVisible: false,
                 pagination: {},
+                order: {
+                    name: '',
+                    order_by: ''
+                }
             }
         },
 
@@ -151,15 +157,51 @@ import modal from './Modal.vue';
                             'X-CSRF-Token': this.csrf_token
                         }
                     })
-                    .then(ressult => {console.log(ressult.json())})
+                    .then(res => res.json())
                     .then(data => {
-                        //alert('Imóvel removido!');
                         this.$toasted.success('Imóvel deletado com sucesso')
 
                         this.fetchImoveis();
                     })
                     .catch(err => console.log(err));
                 }
+            },
+
+            orderBy(value) {
+                if (this.order.order_by === '') {
+                    this.order = {
+                        name: value,
+                        order_by: 'desc'
+                    }
+                } else if (this.order.order_by === 'desc') {
+                    this.order = {
+                        name: value,
+                        order_by: 'asc'
+                    }
+                } else {
+                    this.order = {
+                        name: value,
+                        order_by: 'desc'
+                    }
+                }
+
+                fetch('/imovel/list/'+this.order.name+','+this.order.order_by, {
+                    method: 'GET',
+                    headers: {
+                        'content-type': 'application/json',
+                        'X-CSRF-Token': this.csrf_token
+                    },
+                    dataType: 'json'
+                })
+                .then(res => res.json())
+                    .then(res => {
+                        this.imoveis = res.data;
+
+                        this.paginacao(res.meta, res.links);
+                    })
+                .catch(err => console.log(err));
+
+                console.log(this.order);
             },
 
             showModal() {
