@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid">
+    <div class="container">
         <div class="row justify-content-center">
             <div class="col-sm">
                 <div class="card mt-2">
@@ -60,6 +60,10 @@
 </template>
 
 <script>
+import Toasted from 'vue-toasted';
+
+Vue.use(Toasted, { position: 'bottom-right', duration: 5000, theme: 'toasted-primary' });
+
 import modal from './Modal.vue';
 
     export default {
@@ -134,6 +138,8 @@ import modal from './Modal.vue';
             },            
 
             createdImovel() {
+                this.$toasted.success('Imóvel criado com sucesso')
+
                 this.fetchImoveis();
             },
 
@@ -147,7 +153,8 @@ import modal from './Modal.vue';
                     })
                     .then(ressult => {console.log(ressult.json())})
                     .then(data => {
-                        alert('Imóvel removido!');
+                        //alert('Imóvel removido!');
+                        this.$toasted.success('Imóvel deletado com sucesso')
 
                         this.fetchImoveis();
                     })
