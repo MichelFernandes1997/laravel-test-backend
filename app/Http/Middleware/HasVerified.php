@@ -17,9 +17,9 @@ class HasVerified
      */
     public function handle($request, Closure $next)
     {
-        if ((Contrato::find($request->id) !== null) && (Contrato::find($request->id)->email_verified_at !== null))
+        if ((Contrato::find($request->id) !== null) && (Contrato::find($request->id)->email_verified_at !== null) && ($request->getPathInfo() === '/verify-email/contrato/'))
             return redirect()->route('hasVerified.show');
-        else if ((Imovel::find($request->id) !== null) && (Imovel::find($request->id)->email_verified_at !== null))
+        else if ((Imovel::find($request->id) !== null) && (Imovel::find($request->id)->email_verified_at !== null) && ($request->getPathInfo() === '/verify-email/imovel/'))
             return redirect()->route('hasVerified.show');
         else
             return $next($request);

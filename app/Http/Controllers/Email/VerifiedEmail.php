@@ -18,7 +18,7 @@ class VerifiedEmail extends Controller
     public function verifyEmailContratante(Request $request)
     {
         $contrato = Contrato::where('id', $request->id)->first();
-
+        
         if (hash('sha512', $contrato->emailContratante) === $request->token) {
             $contrato->email_verified_at = Carbon::now()->toDateTimeString();
             
