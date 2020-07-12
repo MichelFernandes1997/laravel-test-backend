@@ -1910,9 +1910,7 @@ module.exports = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var sort_by__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! sort-by */ "./node_modules/sort-by/index.js");
-/* harmony import */ var sort_by__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(sort_by__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _Modal_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Modal.vue */ "./resources/js/components/Modal.vue");
+/* harmony import */ var _Modal_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Modal.vue */ "./resources/js/components/Modal.vue");
 //
 //
 //
@@ -1974,7 +1972,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-
 
 Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
   position: 'bottom-right',
@@ -1985,7 +1982,7 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['csrf_token'],
   components: {
-    modal: _Modal_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
+    modal: _Modal_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data: function data() {
     return {
@@ -2012,6 +2009,7 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
   },
   created: function created() {
     this.fetchImoveis();
+    this.$root.$refs.imovel = this;
   },
   methods: {
     fetchImoveis: function fetchImoveis(page_url) {
@@ -2103,6 +2101,9 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
       });
       console.log(this.order);
     },
+    close: function close() {
+      this.$emit('close');
+    },
     showModal: function showModal() {
       this.isModalVisible = true;
     },
@@ -2123,6 +2124,20 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 //
 //
 //
@@ -2264,6 +2279,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
+Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
+  position: 'bottom-right',
+  duration: 10000,
+  theme: 'toasted-primary'
+});
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'modal',
   props: ['csrf_token'],
@@ -2276,7 +2297,17 @@ __webpack_require__.r(__webpack_exports__);
         rua: '',
         numero: '',
         complemento: ''
-      }
+      },
+      contrato: {
+        tipo_pessoa: '0',
+        documento: '',
+        emailContratante: '',
+        nomeContratante: '',
+        imovel_id: ''
+      },
+      inputsInvalid: '',
+      inputDocumento: '',
+      ponteiroInput: 1
     };
   },
   methods: {
@@ -2302,6 +2333,62 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (err) {
         return console.log(err);
       });
+    },
+    radioTipoPessoa: function radioTipoPessoa(event) {
+      this.contrato.documento = '';
+    },
+    mascaraCpfCnpj: function mascaraCpfCnpj(event) {
+      if (event.target.id === 'cpf') {
+        this.contrato.documento = this.contrato.documento.substring(0, 14);
+        this.contrato.documento = this.contrato.documento.replace(/\D/g, "");
+        this.contrato.documento = this.contrato.documento.replace(/(\d{3})(\d)/, "$1.$2");
+        this.contrato.documento = this.contrato.documento.replace(/(\d{3})(\d)/, "$1.$2");
+        this.contrato.documento = this.contrato.documento.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+      } else {
+        this.contrato.documento = this.contrato.documento.substring(0, 18);
+        this.contrato.documento = this.contrato.documento.replace(/\D/g, "");
+        this.contrato.documento = this.contrato.documento.replace(/^(\d{2})(\d)/, "$1.$2");
+        this.contrato.documento = this.contrato.documento.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+        this.contrato.documento = this.contrato.documento.replace(/\.(\d{3})(\d)/, ".$1/$2");
+        this.contrato.documento = this.contrato.documento.replace(/(\d{4})(\d)/, "$1-$2");
+      }
+    },
+    checkInputs: function checkInputs() {
+      this.inputsInvalid = '';
+
+      for (var _i = 0, _Object$entries = Object.entries(this.contrato); _i < _Object$entries.length; _i++) {
+        var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+            key = _Object$entries$_i[0],
+            value = _Object$entries$_i[1];
+
+        if (value === '') this.inputsInvalid = this.inputsInvalid + key + ', ';
+      }
+
+      if (this.inputsInvalid !== '') return false;else return true;
+    },
+    createContrato: function createContrato() {
+      var _this2 = this;
+
+      if (this.checkInputs()) {
+        fetch('/contrato', {
+          method: 'POST',
+          body: JSON.stringify(this.contrato),
+          headers: {
+            'content-type': 'application/json',
+            'X-CSRF-Token': this.csrf_token
+          }
+        }).then(function (result) {
+          return result.json();
+        }).then(function (data) {
+          _this2.$emit('createImovel');
+
+          _this2.close();
+        })["catch"](function (err) {
+          return console.log(err);
+        });
+      } else {
+        this.$toasted.error("Todos os campos s\xE3o obrigat\xF3rios. Por favor preencha ".concat(this.inputsInvalid));
+      }
     }
   }
 });
@@ -2317,6 +2404,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Modal_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Modal.vue */ "./resources/js/components/Modal.vue");
 //
 //
 //
@@ -2335,9 +2423,88 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ __webpack_exports__["default"] = ({
+  props: ['csrf_token'],
+  components: {
+    modal: _Modal_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
   mounted: function mounted() {
     console.log('mounted');
+  },
+  data: function data() {
+    return {
+      isModalVisible: false
+    };
+  },
+  methods: {
+    createdContrato: function createdContrato() {
+      this.$toasted.success('Contrato criado com sucesso');
+      this.$root.$refs.imovel.fetchImoveis();
+    },
+    showModal: function showModal() {
+      this.isModalVisible = true;
+    },
+    closeModal: function closeModal() {
+      this.isModalVisible = false;
+    }
   }
 });
 
@@ -37951,340 +38118,6 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
-/***/ "./node_modules/sort-by/index.js":
-/*!***************************************!*\
-  !*** ./node_modules/sort-by/index.js ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var objectPath = __webpack_require__(/*! object-path */ "./node_modules/sort-by/node_modules/object-path/index.js");
-var sortBy;
-var sort;
-var type;
-
-/**
- * Filters args based on their type
- * @param  {String} type Type of property to filter by
- * @return {Function}
- */
-type = function(type) {
-    return function(arg) {
-        return typeof arg === type;
-    };
-};
-
-/**
- * Return a comparator function
- * @param  {String} property The key to sort by
- * @param  {Function} map Function to apply to each property
- * @return {Function}        Returns the comparator function
- */
-sort = function sort(property, map) {
-    var sortOrder = 1;
-    var apply = map || function(_, value) { return value };
-
-    if (property[0] === "-") {
-        sortOrder = -1;
-        property = property.substr(1);
-    }
-
-    return function fn(a,b) {
-        var result;
-        var am = apply(property, objectPath.get(a, property));
-        var bm = apply(property, objectPath.get(b, property));
-        if (am < bm) result = -1;
-        if (am > bm) result = 1;
-        if (am === bm) result = 0;
-        return result * sortOrder;
-    }
-};
-
-/**
- * Return a comparator function that sorts by multiple keys
- * @return {Function} Returns the comparator function
- */
-sortBy = function sortBy() {
-
-    var args = Array.prototype.slice.call(arguments);
-    var properties = args.filter(type('string'));
-    var map = args.filter(type('function'))[0];
-
-    return function fn(obj1, obj2) {
-        var numberOfProperties = properties.length,
-            result = 0,
-            i = 0;
-
-        /* try getting a different result from 0 (equal)
-         * as long as we have extra properties to compare
-         */
-        while(result === 0 && i < numberOfProperties) {
-            result = sort(properties[i], map)(obj1, obj2);
-            i++;
-        }
-        return result;
-    };
-};
-
-/**
- * Expose `sortBy`
- * @type {Function}
- */
-module.exports = sortBy;
-
-/***/ }),
-
-/***/ "./node_modules/sort-by/node_modules/object-path/index.js":
-/*!****************************************************************!*\
-  !*** ./node_modules/sort-by/node_modules/object-path/index.js ***!
-  \****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory){
-  'use strict';
-
-  /*istanbul ignore next:cant test*/
-  if ( true && typeof module.exports === 'object') {
-    module.exports = factory();
-  } else if (true) {
-    // AMD. Register as an anonymous module.
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-  } else {}
-})(this, function(){
-  'use strict';
-
-  var
-    toStr = Object.prototype.toString,
-    _hasOwnProperty = Object.prototype.hasOwnProperty;
-
-  function isEmpty(value){
-    if (!value) {
-      return true;
-    }
-    if (isArray(value) && value.length === 0) {
-      return true;
-    } else {
-      for (var i in value) {
-        if (_hasOwnProperty.call(value, i)) {
-          return false;
-        }
-      }
-      return true;
-    }
-  }
-
-  function toString(type){
-    return toStr.call(type);
-  }
-
-  function isNumber(value){
-    return typeof value === 'number' || toString(value) === "[object Number]";
-  }
-
-  function isString(obj){
-    return typeof obj === 'string' || toString(obj) === "[object String]";
-  }
-
-  function isObject(obj){
-    return typeof obj === 'object' && toString(obj) === "[object Object]";
-  }
-
-  function isArray(obj){
-    return typeof obj === 'object' && typeof obj.length === 'number' && toString(obj) === '[object Array]';
-  }
-
-  function isBoolean(obj){
-    return typeof obj === 'boolean' || toString(obj) === '[object Boolean]';
-  }
-
-  function getKey(key){
-    var intKey = parseInt(key);
-    if (intKey.toString() === key) {
-      return intKey;
-    }
-    return key;
-  }
-
-  function set(obj, path, value, doNotReplace){
-    if (isNumber(path)) {
-      path = [path];
-    }
-    if (isEmpty(path)) {
-      return obj;
-    }
-    if (isString(path)) {
-      return set(obj, path.split('.'), value, doNotReplace);
-    }
-    var currentPath = getKey(path[0]);
-
-    if (path.length === 1) {
-      var oldVal = obj[currentPath];
-      if (oldVal === void 0 || !doNotReplace) {
-        obj[currentPath] = value;
-      }
-      return oldVal;
-    }
-
-    if (obj[currentPath] === void 0) {
-      if (isNumber(currentPath)) {
-        obj[currentPath] = [];
-      } else {
-        obj[currentPath] = {};
-      }
-    }
-
-    return set(obj[currentPath], path.slice(1), value, doNotReplace);
-  }
-
-  function del(obj, path) {
-    if (isNumber(path)) {
-      path = [path];
-    }
-
-    if (isEmpty(obj)) {
-      return void 0;
-    }
-
-    if (isEmpty(path)) {
-      return obj;
-    }
-    if(isString(path)) {
-      return del(obj, path.split('.'));
-    }
-
-    var currentPath = getKey(path[0]);
-    var oldVal = obj[currentPath];
-
-    if(path.length === 1) {
-      if (oldVal !== void 0) {
-        if (isArray(obj)) {
-          obj.splice(currentPath, 1);
-        } else {
-          delete obj[currentPath];
-        }
-      }
-    } else {
-      if (obj[currentPath] !== void 0) {
-        return del(obj[currentPath], path.slice(1));
-      }
-    }
-
-    return obj;
-  }
-
-  var objectPath = {};
-
-  objectPath.ensureExists = function (obj, path, value){
-    return set(obj, path, value, true);
-  };
-
-  objectPath.set = function (obj, path, value, doNotReplace){
-    return set(obj, path, value, doNotReplace);
-  };
-
-  objectPath.insert = function (obj, path, value, at){
-    var arr = objectPath.get(obj, path);
-    at = ~~at;
-    if (!isArray(arr)) {
-      arr = [];
-      objectPath.set(obj, path, arr);
-    }
-    arr.splice(at, 0, value);
-  };
-
-  objectPath.empty = function(obj, path) {
-    if (isEmpty(path)) {
-      return obj;
-    }
-    if (isEmpty(obj)) {
-      return void 0;
-    }
-
-    var value, i;
-    if (!(value = objectPath.get(obj, path))) {
-      return obj;
-    }
-
-    if (isString(value)) {
-      return objectPath.set(obj, path, '');
-    } else if (isBoolean(value)) {
-      return objectPath.set(obj, path, false);
-    } else if (isNumber(value)) {
-      return objectPath.set(obj, path, 0);
-    } else if (isArray(value)) {
-      value.length = 0;
-    } else if (isObject(value)) {
-      for (i in value) {
-        if (_hasOwnProperty.call(value, i)) {
-          delete value[i];
-        }
-      }
-    } else {
-      return objectPath.set(obj, path, null);
-    }
-  };
-
-  objectPath.push = function (obj, path /*, values */){
-    var arr = objectPath.get(obj, path);
-    if (!isArray(arr)) {
-      arr = [];
-      objectPath.set(obj, path, arr);
-    }
-
-    arr.push.apply(arr, Array.prototype.slice.call(arguments, 2));
-  };
-
-  objectPath.coalesce = function (obj, paths, defaultValue) {
-    var value;
-
-    for (var i = 0, len = paths.length; i < len; i++) {
-      if ((value = objectPath.get(obj, paths[i])) !== void 0) {
-        return value;
-      }
-    }
-
-    return defaultValue;
-  };
-
-  objectPath.get = function (obj, path, defaultValue){
-    if (isNumber(path)) {
-      path = [path];
-    }
-    if (isEmpty(path)) {
-      return obj;
-    }
-    if (isEmpty(obj)) {
-      return defaultValue;
-    }
-    if (isString(path)) {
-      return objectPath.get(obj, path.split('.'), defaultValue);
-    }
-
-    var currentPath = getKey(path[0]);
-
-    if (path.length === 1) {
-      if (obj[currentPath] === void 0) {
-        return defaultValue;
-      }
-      return obj[currentPath];
-    }
-
-    return objectPath.get(obj[currentPath], path.slice(1), defaultValue);
-  };
-
-  objectPath.del = function(obj, path) {
-    return del(obj, path);
-  };
-
-  return objectPath;
-});
-
-/***/ }),
-
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Modal.vue?vue&type=style&index=0&lang=css&":
 /*!***************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Modal.vue?vue&type=style&index=0&lang=css& ***!
@@ -39195,35 +39028,39 @@ var render = function() {
             "header",
             { staticClass: "modal-header", attrs: { id: "modalTitle" } },
             [
-              _vm._t("header", [
-                _c(
-                  "div",
-                  {
-                    staticClass: "row text-center",
-                    staticStyle: { "margin-left": "2px", width: "100%" }
-                  },
-                  [
-                    _c("div", { staticClass: "col-10 text-left" }, [
-                      _c("h4", [_vm._v("Criar novo imóvel")])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-2 text-right" }, [
-                      _c(
-                        "button",
-                        {
-                          staticClass: "btn-close",
-                          attrs: {
-                            type: "button",
-                            "aria-label": "Close modal"
+              _vm._t(
+                "header",
+                [
+                  _c(
+                    "div",
+                    {
+                      staticClass: "row text-center",
+                      staticStyle: { "margin-left": "2px", width: "100%" }
+                    },
+                    [
+                      _c("div", { staticClass: "col-10 text-left" }, [
+                        _c("h4", [_vm._v("Criar novo imóvel")])
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-2 text-right" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn-close",
+                            attrs: {
+                              type: "button",
+                              "aria-label": "Close modal"
+                            },
+                            on: { click: _vm.close }
                           },
-                          on: { click: _vm.close }
-                        },
-                        [_vm._v("x")]
-                      )
-                    ])
-                  ]
-                )
-              ])
+                          [_vm._v("x")]
+                        )
+                      ])
+                    ]
+                  )
+                ],
+                { close: _vm.close }
+              )
             ],
             2
           ),
@@ -39232,240 +39069,251 @@ var render = function() {
             "section",
             { staticClass: "modal-body", attrs: { id: "modalDescription" } },
             [
-              _vm._t("body", [
-                _c(
-                  "form",
-                  {
-                    on: {
-                      submit: function($event) {
-                        $event.preventDefault()
-                        return _vm.createImovel($event)
+              _vm._t(
+                "body",
+                [
+                  _c(
+                    "form",
+                    {
+                      on: {
+                        submit: function($event) {
+                          $event.preventDefault()
+                          return _vm.createImovel($event)
+                        }
                       }
-                    }
-                  },
-                  [
-                    _c("div", { staticClass: "form-row" }, [
-                      _c("div", { staticClass: "form-group col-md-12" }, [
-                        _c("label", { attrs: { for: "emailProprietario" } }, [
-                          _vm._v("Email do proprietário")
-                        ]),
-                        _vm._v(" "),
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.imovel.emailProprietario,
-                              expression: "imovel.emailProprietario"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          attrs: {
-                            type: "email",
-                            id: "emailProprietario",
-                            placeholder: "Email",
-                            required: ""
-                          },
-                          domProps: { value: _vm.imovel.emailProprietario },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
+                    },
+                    [
+                      _c("div", { staticClass: "form-row" }, [
+                        _c("div", { staticClass: "form-group col-md-12" }, [
+                          _c("label", { attrs: { for: "emailProprietario" } }, [
+                            _vm._v("Email do proprietário")
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.imovel.emailProprietario,
+                                expression: "imovel.emailProprietario"
                               }
-                              _vm.$set(
-                                _vm.imovel,
-                                "emailProprietario",
-                                $event.target.value
-                              )
-                            }
-                          }
-                        })
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "form-row mt-2" }, [
-                      _c("div", { staticClass: "form-group col-md-6" }, [
-                        _c("label", { attrs: { for: "estado" } }, [
-                          _vm._v("Estado")
-                        ]),
-                        _vm._v(" "),
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.imovel.estado,
-                              expression: "imovel.estado"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          attrs: {
-                            type: "text",
-                            id: "estado",
-                            placeholder: "Rio de Janeiro"
-                          },
-                          domProps: { value: _vm.imovel.estado },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "email",
+                              id: "emailProprietario",
+                              placeholder: "Email",
+                              required: ""
+                            },
+                            domProps: { value: _vm.imovel.emailProprietario },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.imovel,
+                                  "emailProprietario",
+                                  $event.target.value
+                                )
                               }
-                              _vm.$set(
-                                _vm.imovel,
-                                "estado",
-                                $event.target.value
-                              )
                             }
-                          }
-                        })
+                          })
+                        ])
                       ]),
                       _vm._v(" "),
-                      _c("div", { staticClass: "form-group col-md-6" }, [
-                        _c("label", { attrs: { for: "cidade" } }, [
-                          _vm._v("Cidade")
+                      _c("div", { staticClass: "form-row mt-2" }, [
+                        _c("div", { staticClass: "form-group col-md-6" }, [
+                          _c("label", { attrs: { for: "estado" } }, [
+                            _vm._v("Estado")
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.imovel.estado,
+                                expression: "imovel.estado"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              id: "estado",
+                              placeholder: "Rio de Janeiro"
+                            },
+                            domProps: { value: _vm.imovel.estado },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.imovel,
+                                  "estado",
+                                  $event.target.value
+                                )
+                              }
+                            }
+                          })
                         ]),
                         _vm._v(" "),
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.imovel.cidade,
-                              expression: "imovel.cidade"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          attrs: {
-                            type: "text",
-                            id: "cidade",
-                            placeholder: "Niterói"
-                          },
-                          domProps: { value: _vm.imovel.cidade },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
+                        _c("div", { staticClass: "form-group col-md-6" }, [
+                          _c("label", { attrs: { for: "cidade" } }, [
+                            _vm._v("Cidade")
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.imovel.cidade,
+                                expression: "imovel.cidade"
                               }
-                              _vm.$set(
-                                _vm.imovel,
-                                "cidade",
-                                $event.target.value
-                              )
-                            }
-                          }
-                        })
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "form-row mt-2" }, [
-                      _c("div", { staticClass: "form-group col-md-6" }, [
-                        _c("label", { attrs: { for: "rua" } }, [_vm._v("Rua")]),
-                        _vm._v(" "),
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.imovel.rua,
-                              expression: "imovel.rua"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          attrs: {
-                            type: "text",
-                            id: "rua",
-                            placeholder: "Rua Visconde Jr."
-                          },
-                          domProps: { value: _vm.imovel.rua },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              id: "cidade",
+                              placeholder: "Niterói"
+                            },
+                            domProps: { value: _vm.imovel.cidade },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.imovel,
+                                  "cidade",
+                                  $event.target.value
+                                )
                               }
-                              _vm.$set(_vm.imovel, "rua", $event.target.value)
                             }
-                          }
-                        })
+                          })
+                        ])
                       ]),
                       _vm._v(" "),
-                      _c("div", { staticClass: "form-group col-md-6" }, [
-                        _c("label", { attrs: { for: "numero" } }, [
-                          _vm._v("Número")
+                      _c("div", { staticClass: "form-row mt-2" }, [
+                        _c("div", { staticClass: "form-group col-md-6" }, [
+                          _c("label", { attrs: { for: "rua" } }, [
+                            _vm._v("Rua")
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.imovel.rua,
+                                expression: "imovel.rua"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              id: "rua",
+                              placeholder: "Rua Visconde Jr."
+                            },
+                            domProps: { value: _vm.imovel.rua },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(_vm.imovel, "rua", $event.target.value)
+                              }
+                            }
+                          })
                         ]),
                         _vm._v(" "),
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.imovel.numero,
-                              expression: "imovel.numero"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          attrs: {
-                            type: "text",
-                            id: "numero",
-                            placeholder: "1039"
-                          },
-                          domProps: { value: _vm.imovel.numero },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
+                        _c("div", { staticClass: "form-group col-md-6" }, [
+                          _c("label", { attrs: { for: "numero" } }, [
+                            _vm._v("Número")
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.imovel.numero,
+                                expression: "imovel.numero"
                               }
-                              _vm.$set(
-                                _vm.imovel,
-                                "numero",
-                                $event.target.value
-                              )
-                            }
-                          }
-                        })
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "form-row mt-2" }, [
-                      _c("div", { staticClass: "form-group col-md-12" }, [
-                        _c("label", { attrs: { for: "complemento" } }, [
-                          _vm._v("Complemento")
-                        ]),
-                        _vm._v(" "),
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.imovel.complemento,
-                              expression: "imovel.complemento"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          attrs: {
-                            type: "text",
-                            id: "complemento",
-                            placeholder:
-                              "Apartamento 203, Cada dos fundos, escritório e etc"
-                          },
-                          domProps: { value: _vm.imovel.complemento },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              id: "numero",
+                              placeholder: "1039"
+                            },
+                            domProps: { value: _vm.imovel.numero },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.imovel,
+                                  "numero",
+                                  $event.target.value
+                                )
                               }
-                              _vm.$set(
-                                _vm.imovel,
-                                "complemento",
-                                $event.target.value
-                              )
                             }
-                          }
-                        })
+                          })
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-row mt-2" }, [
+                        _c("div", { staticClass: "form-group col-md-12" }, [
+                          _c("label", { attrs: { for: "complemento" } }, [
+                            _vm._v("Complemento")
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.imovel.complemento,
+                                expression: "imovel.complemento"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              id: "complemento",
+                              placeholder:
+                                "Apartamento 203, Cada dos fundos, escritório e etc"
+                            },
+                            domProps: { value: _vm.imovel.complemento },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.imovel,
+                                  "complemento",
+                                  $event.target.value
+                                )
+                              }
+                            }
+                          })
+                        ])
                       ])
-                    ])
-                  ]
-                )
-              ])
+                    ]
+                  )
+                ],
+                {
+                  createContrato: _vm.createContrato,
+                  contrato: _vm.contrato,
+                  radioTipoPessoa: _vm.radioTipoPessoa,
+                  mascaraCpfCnpj: _vm.mascaraCpfCnpj
+                }
+              )
             ],
             2
           ),
@@ -39474,27 +39322,31 @@ var render = function() {
             "footer",
             { staticClass: "modal-footer" },
             [
-              _vm._t("footer", [
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn-green",
-                    attrs: { type: "button", "aria-label": "Fechar modal" },
-                    on: { click: _vm.close }
-                  },
-                  [_vm._v("Fechar")]
-                ),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn-green",
-                    attrs: { type: "button", "aria-label": "Criar imovel" },
-                    on: { click: _vm.createImovel }
-                  },
-                  [_vm._v("Criar imovel")]
-                )
-              ])
+              _vm._t(
+                "footer",
+                [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn-green",
+                      attrs: { type: "button", "aria-label": "Fechar modal" },
+                      on: { click: _vm.close }
+                    },
+                    [_vm._v("Fechar")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn-green",
+                      attrs: { type: "button", "aria-label": "Criar imovel" },
+                      on: { click: _vm.createImovel }
+                    },
+                    [_vm._v("Criar imovel")]
+                  )
+                ],
+                { close: _vm.close, createContrato: _vm.createContrato }
+              )
             ],
             2
           )
@@ -39525,43 +39377,474 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c(
+    "nav",
+    { staticClass: "navbar navbar-expand-sm bg-dark navbar-dark" },
+    [
+      _c("ul", { staticClass: "navbar-nav" }, [
+        _vm._m(0),
+        _vm._v(" "),
+        _vm._m(1),
+        _vm._v(" "),
+        _c(
+          "li",
+          { staticClass: "nav-item" },
+          [
+            _c(
+              "button",
+              {
+                staticClass: "nav-link btn btn-link",
+                attrs: { type: "button" },
+                on: { click: _vm.showModal }
+              },
+              [_vm._v("Contratos")]
+            ),
+            _vm._v(" "),
+            _c("modal-component", {
+              directives: [
+                {
+                  name: "show",
+                  rawName: "v-show",
+                  value: _vm.isModalVisible,
+                  expression: "isModalVisible"
+                }
+              ],
+              attrs: { csrf_token: _vm.csrf_token },
+              on: {
+                createContrato: _vm.createdContrato,
+                close: _vm.closeModal
+              },
+              scopedSlots: _vm._u([
+                {
+                  key: "header",
+                  fn: function(ref) {
+                    var close = ref.close
+                    return [
+                      _c(
+                        "div",
+                        {
+                          staticClass: "row text-center",
+                          staticStyle: { "margin-left": "2px", width: "100%" }
+                        },
+                        [
+                          _c("div", { staticClass: "col-10 text-left" }, [
+                            _c("h4", [_vm._v("Criar novo contrato")])
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-2 text-right" }, [
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn-close",
+                                attrs: {
+                                  type: "button",
+                                  "aria-label": "Close modal"
+                                },
+                                on: { click: close }
+                              },
+                              [_vm._v("x")]
+                            )
+                          ])
+                        ]
+                      )
+                    ]
+                  }
+                },
+                {
+                  key: "body",
+                  fn: function(ref) {
+                    var createContrato = ref.createContrato
+                    var contrato = ref.contrato
+                    var mascaraCpfCnpj = ref.mascaraCpfCnpj
+                    var radioTipoPessoa = ref.radioTipoPessoa
+                    return [
+                      _c(
+                        "form",
+                        {
+                          on: {
+                            submit: function($event) {
+                              $event.preventDefault()
+                              return createContrato($event)
+                            }
+                          }
+                        },
+                        [
+                          _c("div", { staticClass: "form-row" }, [
+                            _c(
+                              "div",
+                              { staticClass: "form-check form-check-inline" },
+                              [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: contrato.tipo_pessoa,
+                                      expression: "contrato.tipo_pessoa"
+                                    }
+                                  ],
+                                  staticClass: "form-check-input",
+                                  attrs: {
+                                    type: "radio",
+                                    id: "pessoaFisica",
+                                    name: "tipo_pessoa",
+                                    value: "0"
+                                  },
+                                  domProps: {
+                                    checked: _vm._q(contrato.tipo_pessoa, "0")
+                                  },
+                                  on: {
+                                    change: [
+                                      function($event) {
+                                        return _vm.$set(
+                                          contrato,
+                                          "tipo_pessoa",
+                                          "0"
+                                        )
+                                      },
+                                      function($event) {
+                                        return radioTipoPessoa($event)
+                                      }
+                                    ]
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c(
+                                  "label",
+                                  {
+                                    staticClass: "form-check-label",
+                                    attrs: { for: "pessoaFisica" }
+                                  },
+                                  [_vm._v("Pessoa Física")]
+                                )
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "div",
+                              { staticClass: "form-check form-check-inline" },
+                              [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: contrato.tipo_pessoa,
+                                      expression: "contrato.tipo_pessoa"
+                                    }
+                                  ],
+                                  staticClass: "form-check-input",
+                                  attrs: {
+                                    type: "radio",
+                                    id: "pessoaJuridica",
+                                    name: "tipo_pessoa",
+                                    value: "1"
+                                  },
+                                  domProps: {
+                                    checked: _vm._q(contrato.tipo_pessoa, "1")
+                                  },
+                                  on: {
+                                    change: [
+                                      function($event) {
+                                        return _vm.$set(
+                                          contrato,
+                                          "tipo_pessoa",
+                                          "1"
+                                        )
+                                      },
+                                      function($event) {
+                                        return radioTipoPessoa($event)
+                                      }
+                                    ]
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c(
+                                  "label",
+                                  {
+                                    staticClass: "form-check-label",
+                                    attrs: { for: "pessoaJuridica" }
+                                  },
+                                  [_vm._v("Pessoa Jurídica")]
+                                )
+                              ]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "form-row mt-4" }, [
+                            contrato.tipo_pessoa === "0"
+                              ? _c(
+                                  "div",
+                                  { staticClass: "form-group col-md-6" },
+                                  [
+                                    _c("label", { attrs: { for: "cpf" } }, [
+                                      _vm._v("Documento")
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("input", {
+                                      directives: [
+                                        {
+                                          name: "model",
+                                          rawName: "v-model",
+                                          value: contrato.documento,
+                                          expression: "contrato.documento"
+                                        }
+                                      ],
+                                      staticClass: "form-control",
+                                      attrs: {
+                                        type: "text",
+                                        id: "cpf",
+                                        placeholder: "CPF"
+                                      },
+                                      domProps: { value: contrato.documento },
+                                      on: {
+                                        keyup: function($event) {
+                                          return mascaraCpfCnpj($event)
+                                        },
+                                        input: function($event) {
+                                          if ($event.target.composing) {
+                                            return
+                                          }
+                                          _vm.$set(
+                                            contrato,
+                                            "documento",
+                                            $event.target.value
+                                          )
+                                        }
+                                      }
+                                    })
+                                  ]
+                                )
+                              : _c(
+                                  "div",
+                                  { staticClass: "form-group col-md-6" },
+                                  [
+                                    _c("label", { attrs: { for: "cnpj" } }, [
+                                      _vm._v("Documento")
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("input", {
+                                      directives: [
+                                        {
+                                          name: "model",
+                                          rawName: "v-model",
+                                          value: contrato.documento,
+                                          expression: "contrato.documento"
+                                        }
+                                      ],
+                                      staticClass: "form-control",
+                                      attrs: {
+                                        type: "text",
+                                        id: "cnpj",
+                                        placeholder: "CNPJ"
+                                      },
+                                      domProps: { value: contrato.documento },
+                                      on: {
+                                        keyup: function($event) {
+                                          return mascaraCpfCnpj($event)
+                                        },
+                                        input: function($event) {
+                                          if ($event.target.composing) {
+                                            return
+                                          }
+                                          _vm.$set(
+                                            contrato,
+                                            "documento",
+                                            $event.target.value
+                                          )
+                                        }
+                                      }
+                                    })
+                                  ]
+                                ),
+                            _vm._v(" "),
+                            _c("div", { staticClass: "form-group col-md-6" }, [
+                              _c(
+                                "label",
+                                { attrs: { for: "emailContratante" } },
+                                [_vm._v("Email do Contratante")]
+                              ),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: contrato.emailContratante,
+                                    expression: "contrato.emailContratante"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "text",
+                                  id: "emailContratante",
+                                  placeholder: "fulano.acessoria@live.com"
+                                },
+                                domProps: { value: contrato.emailContratante },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      contrato,
+                                      "emailContratante",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "form-row mt-2" }, [
+                            _c("div", { staticClass: "form-group col-md-6" }, [
+                              _c(
+                                "label",
+                                { attrs: { for: "nomeContratante" } },
+                                [_vm._v("Nome Completo")]
+                              ),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: contrato.nomeContratante,
+                                    expression: "contrato.nomeContratante"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "text",
+                                  id: "nomeContratante",
+                                  placeholder: "Ciclano Fernandes da Silva"
+                                },
+                                domProps: { value: contrato.nomeContratante },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      contrato,
+                                      "nomeContratante",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ]),
+                            _vm._v(" "),
+                            _c("div", { staticClass: "form-group col-md-6" }, [
+                              _c("label", { attrs: { for: "imovel_id" } }, [
+                                _vm._v("Imóveis")
+                              ]),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: contrato.imovel_id,
+                                    expression: "contrato.imovel_id"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "text",
+                                  id: "imovel_id",
+                                  placeholder: "Escolha o imóvel"
+                                },
+                                domProps: { value: contrato.imovel_id },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      contrato,
+                                      "imovel_id",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  }
+                },
+                {
+                  key: "footer",
+                  fn: function(ref) {
+                    var close = ref.close
+                    var createContrato = ref.createContrato
+                    return [
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn-green",
+                          attrs: {
+                            type: "button",
+                            "aria-label": "Fechar modal"
+                          },
+                          on: { click: close }
+                        },
+                        [_vm._v("Fechar")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn-green",
+                          attrs: {
+                            type: "button",
+                            "aria-label": "Criar imovel"
+                          },
+                          on: { click: createContrato }
+                        },
+                        [_vm._v("Criar contrato")]
+                      )
+                    ]
+                  }
+                }
+              ])
+            })
+          ],
+          1
+        )
+      ])
+    ]
+  )
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c(
-      "nav",
-      { staticClass: "navbar navbar-expand-sm bg-dark navbar-dark" },
-      [
-        _c("ul", { staticClass: "navbar-nav" }, [
-          _c("li", { staticClass: "nav-item mr-2" }, [
-            _c(
-              "a",
-              {
-                staticClass: "nav-link disabled text-white-50",
-                attrs: { href: "#" }
-              },
-              [_c("h5", [_vm._v("Accourdous Test")])]
-            )
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "nav-item" }, [
-            _c("a", { staticClass: "nav-link", attrs: { href: "/" } }, [
-              _vm._v("Home")
-            ])
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "nav-item" }, [
-            _c("a", { staticClass: "nav-link", attrs: { href: "#" } }, [
-              _vm._v("Contratos")
-            ])
-          ])
-        ])
-      ]
-    )
+    return _c("li", { staticClass: "nav-item mr-2" }, [
+      _c(
+        "a",
+        {
+          staticClass: "nav-link disabled text-white-50",
+          attrs: { href: "#" }
+        },
+        [_c("h5", [_vm._v("Accourdous Test")])]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", { staticClass: "nav-item" }, [
+      _c("a", { staticClass: "nav-link", attrs: { href: "/" } }, [
+        _vm._v("Home")
+      ])
+    ])
   }
 ]
 render._withStripped = true

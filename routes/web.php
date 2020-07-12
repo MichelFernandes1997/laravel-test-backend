@@ -21,3 +21,7 @@ Route::get('/', function () {
 Route::get('/imovel/list/{order}', 'Imovel\ImovelController@orderBy');
 
 Route::resource('imovel', ImovelController::class);
+
+Route::get('/contrato', "Contrato\ContratoController@index");
+
+Route::post('/contrato/{contrato}', "Contrato\ContratoController@store");

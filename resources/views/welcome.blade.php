@@ -10,7 +10,7 @@
     </head>
     <body>
         <div id="app">
-            <navbar-component></navbar-component>
+            <navbar-component csrf_token="{{ csrf_token() }}"></navbar-component>
             <imovel-component csrf_token="{{ csrf_token() }}"></imovel-component>
         </div>
 

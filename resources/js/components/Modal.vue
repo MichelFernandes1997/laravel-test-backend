@@ -3,7 +3,7 @@
         <div class="modal-backdrop">
             <div class="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-describedby="modalDescription">
                 <header class="modal-header" id="modalTitle">
-                    <slot name="header">
+                    <slot name="header" :close="close">
                         <div class="row text-center" style="margin-left: 2px; width: 100%;">
                             <div class="col-10 text-left"><h4>Criar novo imóvel</h4></div>
 
@@ -14,7 +14,7 @@
                     </slot>
                 </header>
                 <section class="modal-body" id="modalDescription">
-                    <slot name="body">
+                    <slot name="body" :createContrato="createContrato" :contrato="contrato" :radioTipoPessoa="radioTipoPessoa" :mascaraCpfCnpj="mascaraCpfCnpj">
                         <form @submit.prevent="createImovel">
                             <div class="form-row">
                                 <div class="form-group col-md-12">
@@ -57,7 +57,7 @@
                     </slot>
                 </section>
                 <footer class="modal-footer">
-                    <slot name="footer">
+                    <slot name="footer" :close="close" :createContrato="createContrato">
                         <button type="button" class="btn-green" @click="close" aria-label="Fechar modal">Fechar</button>
                         <button type="button" class="btn-green" @click="createImovel" aria-label="Criar imovel">Criar imovel</button>
                     </slot>
@@ -140,7 +140,11 @@
 </style>
 
 <script>
-  export default {
+import Toasted from 'vue-toasted';
+
+Vue.use(Toasted, { position: 'bottom-right', duration: 10000, theme: 'toasted-primary' });
+
+export default {
     name: 'modal',
 
     props: [
@@ -156,32 +160,101 @@
                 rua: '',
                 numero: '',
                 complemento: ''
-            }
+            },
+            contrato: {
+                tipo_pessoa: '0',
+                documento: '',
+                emailContratante: '',
+                nomeContratante: '',
+                imovel_id: ''
+            },
+            inputsInvalid: '',
+            inputDocumento: '',
+            ponteiroInput: 1,
         }
     },
 
     methods: {
-      close() {
-        this.$emit('close');
-      },
+        close() {
+            this.$emit('close');
+        },
 
-    createImovel() {
-        fetch('/imovel', {
-            method: 'POST',
-            body: JSON.stringify(this.imovel),
-            headers: {
-                'content-type': 'application/json',
-                'X-CSRF-Token': this.csrf_token
+        createImovel() {
+            fetch('/imovel', {
+                method: 'POST',
+                body: JSON.stringify(this.imovel),
+                headers: {
+                    'content-type': 'application/json',
+                    'X-CSRF-Token': this.csrf_token
+                }
+            })
+            .then(result => result.json())
+            .then(data => {
+                this.$emit('createImovel');
+
+                this.close();
+            })
+            .catch(err => console.log(err));
+        },
+
+        radioTipoPessoa(event) {
+            this.contrato.documento = '';
+        },
+
+        mascaraCpfCnpj(event) {
+            if (event.target.id === 'cpf') {
+                this.contrato.documento = this.contrato.documento.substring(0,14)
+
+                this.contrato.documento = this.contrato.documento.replace(/\D/g,"")
+                this.contrato.documento = this.contrato.documento.replace(/(\d{3})(\d)/,"$1.$2")
+                this.contrato.documento = this.contrato.documento.replace(/(\d{3})(\d)/,"$1.$2")
+                this.contrato.documento = this.contrato.documento.replace(/(\d{3})(\d{1,2})$/,"$1-$2")
+            } else {
+                this.contrato.documento = this.contrato.documento.substring(0,18)
+
+                this.contrato.documento = this.contrato.documento.replace(/\D/g,"")
+                this.contrato.documento = this.contrato.documento.replace(/^(\d{2})(\d)/,"$1.$2")
+                this.contrato.documento = this.contrato.documento.replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3")
+                this.contrato.documento = this.contrato.documento.replace(/\.(\d{3})(\d)/,".$1/$2")
+                this.contrato.documento = this.contrato.documento.replace(/(\d{4})(\d)/,"$1-$2")
             }
-        })
-        .then(result => result.json())
-        .then(data => {
-            this.$emit('createImovel');
+        },
 
-            this.close();
-        })
-        .catch(err => console.log(err));
-      }
+        checkInputs() {
+            this.inputsInvalid = '';
+
+            for (let [key, value] of Object.entries(this.contrato)) {
+                if (value === '')
+                    this.inputsInvalid = this.inputsInvalid+key+', '
+            }
+
+            if (this.inputsInvalid !== '')
+                return false;
+            else
+                return true;
+        },
+
+        createContrato() {
+            if (this.checkInputs()) {
+                fetch('/contrato', {
+                    method: 'POST',
+                    body: JSON.stringify(this.contrato),
+                    headers: {
+                        'content-type': 'application/json',
+                        'X-CSRF-Token': this.csrf_token
+                    }
+                })
+                .then(result => result.json())
+                .then(data => {
+                    this.$emit('createImovel');
+
+                    this.close();
+                })
+                .catch(err => console.log(err));
+            } else {
+                this.$toasted.error(`Todos os campos são obrigatórios. Por favor preencha ${this.inputsInvalid}`);
+            }
+        }
     },
-  };
+};
 </script>

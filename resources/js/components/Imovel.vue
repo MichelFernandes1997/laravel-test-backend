@@ -62,8 +62,6 @@
 <script>
 import Toasted from 'vue-toasted';
 
-import sortBy from 'sort-by';
-
 Vue.use(Toasted, { position: 'bottom-right', duration: 5000, theme: 'toasted-primary' });
 
 import modal from './Modal.vue';
@@ -103,6 +101,8 @@ import modal from './Modal.vue';
 
         created() {
             this.fetchImoveis();
+
+            this.$root.$refs.imovel = this;
         },
 
         methods: {
@@ -202,6 +202,10 @@ import modal from './Modal.vue';
                 .catch(err => console.log(err));
 
                 console.log(this.order);
+            },
+
+            close() {
+                this.$emit('close');
             },
 
             showModal() {

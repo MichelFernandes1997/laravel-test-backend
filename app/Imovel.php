@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Imovel extends Model
 {
@@ -14,4 +15,9 @@ class Imovel extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function contrato()
+    {
+        return $this->belongsTo('App\Contrato');
+    }
 }
