@@ -2282,14 +2282,26 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
   position: 'bottom-right',
-  duration: 10000,
+  duration: 7000,
   theme: 'toasted-primary'
 });
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'modal',
   props: ['csrf_token'],
+  mounted: function mounted() {
+    var _this = this;
+
+    fetch('/imovel/select').then(function (res) {
+      return res.json();
+    }).then(function (res) {
+      _this.imoveis = res.data;
+    })["catch"](function (err) {
+      return console.log(err);
+    });
+  },
   data: function data() {
     return {
+      imoveis: [],
       imovel: {
         emailProprietario: '',
         estado: '',
@@ -2305,7 +2317,8 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
         nomeContratante: '',
         imovel_id: ''
       },
-      inputsInvalid: '',
+      inputsEmpty: '',
+      emailInvalid: false,
       inputDocumento: '',
       ponteiroInput: 1
     };
@@ -2315,7 +2328,7 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
       this.$emit('close');
     },
     createImovel: function createImovel() {
-      var _this = this;
+      var _this2 = this;
 
       fetch('/imovel', {
         method: 'POST',
@@ -2327,9 +2340,9 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
       }).then(function (result) {
         return result.json();
       }).then(function (data) {
-        _this.$emit('createImovel');
+        _this2.$emit('createImovel');
 
-        _this.close();
+        _this2.close();
       })["catch"](function (err) {
         return console.log(err);
       });
@@ -2354,20 +2367,41 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
       }
     },
     checkInputs: function checkInputs() {
-      this.inputsInvalid = '';
+      this.inputsEmpty = '';
 
       for (var _i = 0, _Object$entries = Object.entries(this.contrato); _i < _Object$entries.length; _i++) {
         var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
             key = _Object$entries$_i[0],
             value = _Object$entries$_i[1];
 
-        if (value === '') this.inputsInvalid = this.inputsInvalid + key + ', ';
+        if (value === '') {
+          if (key === 'emailContratante') {
+            this.inputsEmpty = this.inputsEmpty + 'Email do contratante' + ', ';
+          }
+
+          if (key === 'documento') {
+            this.inputsEmpty = this.inputsEmpty + 'Documento' + ', ';
+          }
+
+          if (key === 'nomeContratante') {
+            this.inputsEmpty = this.inputsEmpty + 'Nome Completo' + ', ';
+          }
+
+          if (key === 'imovel_id') {
+            this.inputsEmpty = this.inputsEmpty + 'Imóveis' + ', ';
+          }
+        }
+
+        if (key === 'emailContratante' && value !== '') {
+          var regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+          if (!regex.test(value)) this.emailInvalid = true;
+        }
       }
 
-      if (this.inputsInvalid !== '') return false;else return true;
+      if (this.inputsEmpty !== '' || this.emailInvalid) return false;else return true;
     },
     createContrato: function createContrato() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (this.checkInputs()) {
         fetch('/contrato', {
@@ -2380,14 +2414,16 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
         }).then(function (result) {
           return result.json();
         }).then(function (data) {
-          _this2.$emit('createImovel');
+          console.log(data);
 
-          _this2.close();
+          _this3.$emit('createContrato');
+
+          _this3.close();
         })["catch"](function (err) {
           return console.log(err);
         });
       } else {
-        this.$toasted.error("Todos os campos s\xE3o obrigat\xF3rios. Por favor preencha ".concat(this.inputsInvalid));
+        this.$toasted.error(this.inputsEmpty !== '' ? this.emailInvalid ? 'Email inválido por favor corrija o campo. ' + "Todos os campos s\xE3o obrigat\xF3rios por favor preencha ".concat(this.inputsEmpty) : "Todos os campos s\xE3o obrigat\xF3rios. Por favor preencha ".concat(this.inputsEmpty) : '');
       }
     }
   }
@@ -2405,6 +2441,10 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Modal_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Modal.vue */ "./resources/js/components/Modal.vue");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_1__);
+//
+//
 //
 //
 //
@@ -2481,6 +2521,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 
+
+Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_1___default.a, {
+  position: 'bottom-right',
+  duration: 5000,
+  theme: 'toasted-primary'
+});
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['csrf_token'],
   components: {
@@ -39311,7 +39357,8 @@ var render = function() {
                   createContrato: _vm.createContrato,
                   contrato: _vm.contrato,
                   radioTipoPessoa: _vm.radioTipoPessoa,
-                  mascaraCpfCnpj: _vm.mascaraCpfCnpj
+                  mascaraCpfCnpj: _vm.mascaraCpfCnpj,
+                  imoveis: _vm.imoveis
                 }
               )
             ],
@@ -39457,6 +39504,7 @@ var render = function() {
                     var contrato = ref.contrato
                     var mascaraCpfCnpj = ref.mascaraCpfCnpj
                     var radioTipoPessoa = ref.radioTipoPessoa
+                    var imoveis = ref.imoveis
                     return [
                       _c(
                         "form",
@@ -39741,35 +39789,63 @@ var render = function() {
                                 _vm._v("Imóveis")
                               ]),
                               _vm._v(" "),
-                              _c("input", {
-                                directives: [
-                                  {
-                                    name: "model",
-                                    rawName: "v-model",
-                                    value: contrato.imovel_id,
-                                    expression: "contrato.imovel_id"
-                                  }
-                                ],
-                                staticClass: "form-control",
-                                attrs: {
-                                  type: "text",
-                                  id: "imovel_id",
-                                  placeholder: "Escolha o imóvel"
-                                },
-                                domProps: { value: contrato.imovel_id },
-                                on: {
-                                  input: function($event) {
-                                    if ($event.target.composing) {
-                                      return
+                              _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: contrato.imovel_id,
+                                      expression: "contrato.imovel_id"
                                     }
-                                    _vm.$set(
-                                      contrato,
-                                      "imovel_id",
-                                      $event.target.value
-                                    )
+                                  ],
+                                  staticClass: "form-control",
+                                  attrs: {
+                                    id: "imovel_id",
+                                    placeholder: "Escolha o imóvel"
+                                  },
+                                  on: {
+                                    change: function($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call($event.target.options, function(
+                                          o
+                                        ) {
+                                          return o.selected
+                                        })
+                                        .map(function(o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        contrato,
+                                        "imovel_id",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    }
                                   }
-                                }
-                              })
+                                },
+                                _vm._l(imoveis, function(imovel) {
+                                  return _c(
+                                    "option",
+                                    {
+                                      key: imovel.id,
+                                      domProps: { value: imovel.id }
+                                    },
+                                    [
+                                      _vm._v(
+                                        _vm._s(
+                                          imovel.rua + ", " + imovel.numero
+                                        )
+                                      )
+                                    ]
+                                  )
+                                }),
+                                0
+                              )
                             ])
                           ])
                         ]

@@ -14,7 +14,7 @@
                     </slot>
                 </header>
                 <section class="modal-body" id="modalDescription">
-                    <slot name="body" :createContrato="createContrato" :contrato="contrato" :radioTipoPessoa="radioTipoPessoa" :mascaraCpfCnpj="mascaraCpfCnpj">
+                    <slot name="body" :createContrato="createContrato" :contrato="contrato" :radioTipoPessoa="radioTipoPessoa" :mascaraCpfCnpj="mascaraCpfCnpj" :imoveis="imoveis">
                         <form @submit.prevent="createImovel">
                             <div class="form-row">
                                 <div class="form-group col-md-12">
@@ -142,7 +142,7 @@
 <script>
 import Toasted from 'vue-toasted';
 
-Vue.use(Toasted, { position: 'bottom-right', duration: 10000, theme: 'toasted-primary' });
+Vue.use(Toasted, { position: 'bottom-right', duration: 7000, theme: 'toasted-primary' });
 
 export default {
     name: 'modal',
@@ -151,8 +151,18 @@ export default {
         'csrf_token'
     ],
 
+    mounted() {
+        fetch('/imovel/select')
+        .then(res => res.json())
+        .then(res => {
+            this.imoveis = res.data;
+        })
+        .catch(err => console.log(err));
+    },
+
     data: () => {
         return {
+            imoveis: [],
             imovel: {
                 emailProprietario: '',
                 estado: '',
@@ -168,7 +178,8 @@ export default {
                 nomeContratante: '',
                 imovel_id: ''
             },
-            inputsInvalid: '',
+            inputsEmpty: '',
+            emailInvalid: false,
             inputDocumento: '',
             ponteiroInput: 1,
         }
@@ -221,14 +232,36 @@ export default {
         },
 
         checkInputs() {
-            this.inputsInvalid = '';
+            this.inputsEmpty = '';
 
             for (let [key, value] of Object.entries(this.contrato)) {
-                if (value === '')
-                    this.inputsInvalid = this.inputsInvalid+key+', '
+                if (value === '') {
+                    if (key === 'emailContratante') {
+                        this.inputsEmpty = this.inputsEmpty+'Email do contratante'+', '
+                    }
+
+                    if (key === 'documento') {
+                        this.inputsEmpty = this.inputsEmpty+'Documento'+', '
+                    }
+
+                    if (key === 'nomeContratante') {
+                        this.inputsEmpty = this.inputsEmpty+'Nome Completo'+', '
+                    }
+
+                    if (key === 'imovel_id') {
+                        this.inputsEmpty = this.inputsEmpty+'Imóveis'+', '
+                    }
+                }
+                
+                if((key === 'emailContratante') && (value !== '')) {
+                    const regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+                    
+                    if(!regex.test(value))
+                        this.emailInvalid = true
+                }
             }
 
-            if (this.inputsInvalid !== '')
+            if ((this.inputsEmpty !== '') || (this.emailInvalid))
                 return false;
             else
                 return true;
@@ -246,13 +279,14 @@ export default {
                 })
                 .then(result => result.json())
                 .then(data => {
-                    this.$emit('createImovel');
+                    console.log(data);
+                    this.$emit('createContrato');
 
                     this.close();
                 })
                 .catch(err => console.log(err));
             } else {
-                this.$toasted.error(`Todos os campos são obrigatórios. Por favor preencha ${this.inputsInvalid}`);
+                this.$toasted.error(this.inputsEmpty !== '' ? (this.emailInvalid) ? 'Email inválido por favor corrija o campo. '+`Todos os campos são obrigatórios por favor preencha ${this.inputsEmpty}` : `Todos os campos são obrigatórios. Por favor preencha ${this.inputsEmpty}` : '');
             }
         }
     },

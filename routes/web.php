@@ -20,8 +20,10 @@ Route::get('/', function () {
 
 Route::get('/imovel/list/{order}', 'Imovel\ImovelController@orderBy');
 
+Route::get('/imovel/select', 'Imovel\ImovelController@selectList');
+
 Route::resource('imovel', ImovelController::class);
 
 Route::get('/contrato', "Contrato\ContratoController@index");
 
-Route::post('/contrato/{contrato}', "Contrato\ContratoController@store");
+Route::post('/contrato', "Contrato\ContratoController@store");

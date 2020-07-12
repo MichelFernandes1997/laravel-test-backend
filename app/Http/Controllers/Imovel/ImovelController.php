@@ -38,6 +38,11 @@ class ImovelController extends Controller
         return new ImovelCollection($ordered);
     }
 
+    public function selectList()
+    {
+        return new ImovelCollection(Imovel::all());
+    }
+
     /**
      * Show the form for creating a new resource.
      *

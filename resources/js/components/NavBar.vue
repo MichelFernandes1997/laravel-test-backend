@@ -21,7 +21,7 @@
                             </div>
                         </div>
                     </template>
-                    <template #body="{ createContrato, contrato, mascaraCpfCnpj, radioTipoPessoa }">
+                    <template #body="{ createContrato, contrato, mascaraCpfCnpj, radioTipoPessoa, imoveis }">
                         <form @submit.prevent="createContrato">
                             <div class="form-row">
                                 <div class="form-check form-check-inline">
@@ -58,7 +58,9 @@
                                 <div class="form-group col-md-6">
                                     <label for="imovel_id">Imóveis</label>
 
-                                    <input type="text" class="form-control" v-model="contrato.imovel_id" id="imovel_id" placeholder="Escolha o imóvel">
+                                    <select class="form-control"  v-model="contrato.imovel_id" id="imovel_id" placeholder="Escolha o imóvel">
+                                        <option v-for="imovel in imoveis" :key="imovel.id" :value="imovel.id">{{ imovel.rua+', '+imovel.numero }}</option>
+                                    </select>
                                 </div>
                             </div>
                         </form>
@@ -75,6 +77,10 @@
 
 <script>
 import modal from './Modal.vue';
+
+import Toasted from 'vue-toasted';
+
+Vue.use(Toasted, { position: 'bottom-right', duration: 5000, theme: 'toasted-primary' });
 
     export default {
         props: [

@@ -26,6 +26,8 @@ class ContratoController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $contrato = Contrato::create($request->toArray());
+
+        return response()->json(['data' => $contrato], 201);
     }
 }
