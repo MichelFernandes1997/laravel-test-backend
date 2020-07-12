@@ -19,8 +19,8 @@ class CreateContratosTable extends Migration
             $table->string('documento');
             $table->string('emailContratante');
             $table->string('nomeContratante');
-
-            $table->foreignId('imovel_id')->constrained();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->foreignId('imovel_id');
 
             $table->timestamps();
             $table->softDeletes();

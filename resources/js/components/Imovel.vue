@@ -3,22 +3,30 @@
         <div class="row justify-content-center">
             <div class="col-sm">
                 <div class="card mt-2">
-                    <div class="card-header bg-dark text-white-50">
+                    <div class="card-header bg-dark text-white-50" >
                         <div class="row">
                             <div class="col-4 col-sm-4">Email do Proprietário <button class="btn btn-outline-secondary" @click="orderBy('emailProprietario')">order</button></div>
                             <div class="col-5 col-sm-4">Endereço <button class="btn btn-outline-secondary" @click="orderBy('rua')">order</button></div>
-                            <div class="col-2 col-sm-2">Status <button class="btn btn-outline-secondary" @click="orderBy('status')">order</button></div>
+                            <div class="col-2 col-sm-2">Status <button class="btn btn-outline-secondary" @click="orderBy('contrato_id')">order</button></div>
                             <div class="col-1 col-sm-2 text-center">Ações</div>
                         </div>
                     </div>
 
                     <div class="card-body" v-for="imovel in imoveis" v-bind:key="imovel.id">
-                        <div class="row">
+                        <div class="row" v-if="imovel.email_verified_at !== null">
                             <div class="col-4 col-sm-4">{{  imovel.emailProprietario }}</div>
                             <div class="col-5 col-sm-4">{{ imovel.rua+', '+imovel.numero+', '+imovel.cidade+', '+imovel.estado }}</div>
-                            <div class="col-2 col-sm-2">{{ 'Não Contratado' }}</div>
+                            <div class="col-2 col-sm-2">{{ (imovel.contrato_id) === null ? 'Não contratado' : 'Contratado' }}</div>
                             <div class="col-1 col-sm-2 text-center">
-                                <button @click="deleteImovel(imovel.id)" type="button" class="btn btn-outline-danger w-20">Remover</button>
+                                <button @click="deleteImovel(imovel.id)"  type="button" class="btn btn-outline-danger w-20">Remover</button>
+                            </div>
+                        </div>
+                         <div class="row" v-else>
+                            <div class="col-4 col-sm-4 text-muted">{{  imovel.emailProprietario }}</div>
+                            <div class="col-5 col-sm-4 text-muted">{{ imovel.rua+', '+imovel.numero+', '+imovel.cidade+', '+imovel.estado }}</div>
+                            <div class="col-2 col-sm-2 text-muted">Aguardando confirmação de e-mail!</div>
+                            <div class="col-1 col-sm-2 text-center">
+                                <button @click="deleteImovel(imovel.id)" disabled type="button" class="btn btn-outline-muted w-20">Remover</button>
                             </div>
                         </div>
                     </div>
@@ -85,6 +93,8 @@ import modal from './Modal.vue';
                     cidade: '',
                     rua: '',
                     numero: '',
+                    contrato_id: '',
+                    email_verified_at: '',
                     complemento: '',
                     created_at: '',
                     updated_at: '',
@@ -95,7 +105,7 @@ import modal from './Modal.vue';
                 order: {
                     name: '',
                     order_by: ''
-                }
+                },
             }
         },
 
@@ -115,7 +125,7 @@ import modal from './Modal.vue';
                     .then(res => res.json())
                     .then(res => {
                         this.imoveis = res.data;
-
+                        console.log(this.imoveis);
                         vm.paginacao(res.meta, res.links);
                     })
                     .catch(err => console.log(err));
@@ -196,7 +206,7 @@ import modal from './Modal.vue';
                 .then(res => res.json())
                     .then(res => {
                         this.imoveis = res.data;
-
+                        
                         this.paginacao(res.meta, res.links);
                     })
                 .catch(err => console.log(err));

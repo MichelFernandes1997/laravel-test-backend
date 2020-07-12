@@ -21,6 +21,8 @@ class CreateImovelsTable extends Migration
             $table->string('rua');
             $table->string('numero');
             $table->string('complemento');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->foreignId('contrato_id')->nullable();
 
             $table->timestamps();
 

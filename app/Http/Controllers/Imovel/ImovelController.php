@@ -8,6 +8,8 @@ use App\Http\Requests\CreateImovelRequest;
 use App\Http\Resources\ImovelCollection;
 use Illuminate\Support\Facades\Input;
 use App\Imovel;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyEmail;
 
 class ImovelController extends Controller
 {
@@ -18,7 +20,7 @@ class ImovelController extends Controller
      */
     public function index(Request $request)
     {
-        $imoveis = Imovel::orderByDesc('id')->paginate('8');
+        $imoveis = Imovel::select('*')->with('contrato')->orderByDesc('id')->paginate('8');
         
         return new ImovelCollection($imoveis);
     }
@@ -40,7 +42,7 @@ class ImovelController extends Controller
 
     public function selectList()
     {
-        return new ImovelCollection(Imovel::all());
+        return new ImovelCollection(Imovel::orderBy('id', 'desc')->select('rua', 'numero', 'complemento', 'id')->get());
     }
 
     /**
@@ -63,6 +65,10 @@ class ImovelController extends Controller
     {
         try {
             $newImovel = Imovel::create($request->toArray());
+
+            $data = ['message' => 'Confirmação de e-mail', 'emailToConfirm' => $newImovel->emailProprietario, 'id' => $newImovel->id];
+            
+            Mail::to($newImovel->emailProprietario)->send(new VerifyEmail($data));
 
             return response()->json(['data' => $newImovel], 201);
         } catch (\Exception $e) {

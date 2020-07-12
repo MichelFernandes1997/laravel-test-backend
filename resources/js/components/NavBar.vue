@@ -51,15 +51,17 @@
                             </div>
 
                             <div class="form-row mt-2">
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-12">
                                     <label for="nomeContratante">Nome Completo</label>
                                     <input type="text" class="form-control" v-model="contrato.nomeContratante" id="nomeContratante" placeholder="Ciclano Fernandes da Silva">
                                 </div>
-                                <div class="form-group col-md-6">
+                            </div>
+                            <div class="form-row mt-2">
+                                <div class="form-group col-md-12">
                                     <label for="imovel_id">Imóveis</label>
 
                                     <select class="form-control"  v-model="contrato.imovel_id" id="imovel_id" placeholder="Escolha o imóvel">
-                                        <option v-for="imovel in imoveis" :key="imovel.id" :value="imovel.id">{{ imovel.rua+', '+imovel.numero }}</option>
+                                        <option v-for="imovel in imoveis" :key="imovel.id" :value="imovel.id">{{ imovel.rua+', '+imovel.numero+', '+imovel.complemento }}</option>
                                     </select>
                                 </div>
                             </div>

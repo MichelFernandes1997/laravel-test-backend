@@ -169,12 +169,14 @@ export default {
                 cidade: '',
                 rua: '',
                 numero: '',
+                email_verified_at: '',
                 complemento: ''
             },
             contrato: {
                 tipo_pessoa: '0',
                 documento: '',
                 emailContratante: '',
+                email_verified_at: '',
                 nomeContratante: '',
                 imovel_id: ''
             },
@@ -269,6 +271,8 @@ export default {
 
         createContrato() {
             if (this.checkInputs()) {
+                this.contrato.tipo_pessoa = parseInt(this.contrato.tipo_pessoa);
+                
                 fetch('/contrato', {
                     method: 'POST',
                     body: JSON.stringify(this.contrato),

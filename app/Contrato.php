@@ -3,23 +3,25 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Facades\Arr;
 
 class Contrato extends Model
 {
+    use SoftDeletes;
+
     protected $tipoPessoa = [
         0 => 'Pessoa física',
         1 => 'Pessoa jurídica',
     ];
 
     protected $fillable = [
-        'tipo_pessoa', 'documento', 'emailContratante', 'nomeContratante'
+        'tipo_pessoa', 'documento', 'emailContratante', 'nomeContratante', 'imovel_id', 'email_verified_at'
     ];
 
-    public function propriedade()
+    public function imovel()
     {
-        return $this->hasOne(Imovel::class);
+        return $this->hasOne(Imovel::class, 'id');
     }
 
     /**
@@ -28,6 +30,6 @@ class Contrato extends Model
     */
     public function getTipoPessoaAttribute($value)
     {
-        return Arr::get($this->tipoPessoa, $value);
+        return $this->tipoPessoa[$value];
     }
 }

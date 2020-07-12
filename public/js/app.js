@@ -1972,6 +1972,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
   position: 'bottom-right',
@@ -1994,6 +2002,8 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
         cidade: '',
         rua: '',
         numero: '',
+        contrato_id: '',
+        email_verified_at: '',
         complemento: '',
         created_at: '',
         updated_at: '',
@@ -2021,6 +2031,7 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
         return res.json();
       }).then(function (res) {
         _this.imoveis = res.data;
+        console.log(_this.imoveis);
         vm.paginacao(res.meta, res.links);
       })["catch"](function (err) {
         return console.log(err);
@@ -2308,12 +2319,14 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
         cidade: '',
         rua: '',
         numero: '',
+        email_verified_at: '',
         complemento: ''
       },
       contrato: {
         tipo_pessoa: '0',
         documento: '',
         emailContratante: '',
+        email_verified_at: '',
         nomeContratante: '',
         imovel_id: ''
       },
@@ -2404,6 +2417,7 @@ Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_0___default.a, {
       var _this3 = this;
 
       if (this.checkInputs()) {
+        this.contrato.tipo_pessoa = parseInt(this.contrato.tipo_pessoa);
         fetch('/contrato', {
           method: 'POST',
           body: JSON.stringify(this.contrato),
@@ -2443,6 +2457,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Modal_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Modal.vue */ "./resources/js/components/Modal.vue");
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_1__);
+//
+//
 //
 //
 //
@@ -38842,7 +38858,7 @@ var render = function() {
                       staticClass: "btn btn-outline-secondary",
                       on: {
                         click: function($event) {
-                          return _vm.orderBy("status")
+                          return _vm.orderBy("contrato_id")
                         }
                       }
                     },
@@ -38858,45 +38874,91 @@ var render = function() {
             _vm._v(" "),
             _vm._l(_vm.imoveis, function(imovel) {
               return _c("div", { key: imovel.id, staticClass: "card-body" }, [
-                _c("div", { staticClass: "row" }, [
-                  _c("div", { staticClass: "col-4 col-sm-4" }, [
-                    _vm._v(_vm._s(imovel.emailProprietario))
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-5 col-sm-4" }, [
-                    _vm._v(
-                      _vm._s(
-                        imovel.rua +
-                          ", " +
-                          imovel.numero +
-                          ", " +
-                          imovel.cidade +
-                          ", " +
-                          imovel.estado
-                      )
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-2 col-sm-2" }, [
-                    _vm._v(_vm._s("Não Contratado"))
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-1 col-sm-2 text-center" }, [
-                    _c(
-                      "button",
-                      {
-                        staticClass: "btn btn-outline-danger w-20",
-                        attrs: { type: "button" },
-                        on: {
-                          click: function($event) {
-                            return _vm.deleteImovel(imovel.id)
-                          }
-                        }
-                      },
-                      [_vm._v("Remover")]
-                    )
-                  ])
-                ])
+                imovel.email_verified_at !== null
+                  ? _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-4 col-sm-4" }, [
+                        _vm._v(_vm._s(imovel.emailProprietario))
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-5 col-sm-4" }, [
+                        _vm._v(
+                          _vm._s(
+                            imovel.rua +
+                              ", " +
+                              imovel.numero +
+                              ", " +
+                              imovel.cidade +
+                              ", " +
+                              imovel.estado
+                          )
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-2 col-sm-2" }, [
+                        _vm._v(
+                          _vm._s(
+                            imovel.contrato_id === null
+                              ? "Não contratado"
+                              : "Contratado"
+                          )
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-1 col-sm-2 text-center" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-outline-danger w-20",
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.deleteImovel(imovel.id)
+                              }
+                            }
+                          },
+                          [_vm._v("Remover")]
+                        )
+                      ])
+                    ])
+                  : _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-4 col-sm-4 text-muted" }, [
+                        _vm._v(_vm._s(imovel.emailProprietario))
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-5 col-sm-4 text-muted" }, [
+                        _vm._v(
+                          _vm._s(
+                            imovel.rua +
+                              ", " +
+                              imovel.numero +
+                              ", " +
+                              imovel.cidade +
+                              ", " +
+                              imovel.estado
+                          )
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-2 col-sm-2 text-muted" }, [
+                        _vm._v("Aguardando confirmação de e-mail!")
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-1 col-sm-2 text-center" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-outline-muted w-20",
+                            attrs: { disabled: "", type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.deleteImovel(imovel.id)
+                              }
+                            }
+                          },
+                          [_vm._v("Remover")]
+                        )
+                      ])
+                    ])
               ])
             }),
             _vm._v(" "),
@@ -39746,7 +39808,7 @@ var render = function() {
                           ]),
                           _vm._v(" "),
                           _c("div", { staticClass: "form-row mt-2" }, [
-                            _c("div", { staticClass: "form-group col-md-6" }, [
+                            _c("div", { staticClass: "form-group col-md-12" }, [
                               _c(
                                 "label",
                                 { attrs: { for: "nomeContratante" } },
@@ -39782,9 +39844,11 @@ var render = function() {
                                   }
                                 }
                               })
-                            ]),
-                            _vm._v(" "),
-                            _c("div", { staticClass: "form-group col-md-6" }, [
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "form-row mt-2" }, [
+                            _c("div", { staticClass: "form-group col-md-12" }, [
                               _c("label", { attrs: { for: "imovel_id" } }, [
                                 _vm._v("Imóveis")
                               ]),
@@ -39838,7 +39902,11 @@ var render = function() {
                                     [
                                       _vm._v(
                                         _vm._s(
-                                          imovel.rua + ", " + imovel.numero
+                                          imovel.rua +
+                                            ", " +
+                                            imovel.numero +
+                                            ", " +
+                                            imovel.complemento
                                         )
                                       )
                                     ]

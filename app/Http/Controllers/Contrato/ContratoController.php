@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Contrato;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Contrato;
+use App\Imovel;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyEmail;
 
 class ContratoController extends Controller
 {
@@ -15,7 +18,7 @@ class ContratoController extends Controller
      */
     public function index()
     {
-
+        return response()->json(['contratos' => Contrato::all()]);
     }
 
     /**
@@ -26,8 +29,29 @@ class ContratoController extends Controller
      */
     public function store(Request $request)
     {
-        $contrato = Contrato::create($request->toArray());
+        try {    
+            $contrato = Contrato::create([
+                'tipo_pessoa' => $request->tipo_pessoa,
+                'emailContratante' => $request->emailContratante,
+                'documento' => $request->documento,
+                'imovel_id' => $request->imovel_id,
+                'nomeContratante' => $request->nomeContratante,
+                'email_verified_at' => null
+            ]);
+            
+            $imovel = Imovel::find($request->imovel_id);
 
-        return response()->json(['data' => $contrato], 201);
+            $imovel->contrato_id = $contrato->id;
+
+            $imovel->save();
+
+            $data = ['message' => 'This is a test!', 'emailToConfirm' => $contrato->emailContratante, 'id' => $contrato->id];
+            
+            Mail::to($contrato->emailContratante)->send(new VerifyEmail($data));
+            
+            return response()->json(['data' => $request->toArray()], 201);
+        } catch (Exception $e) {
+            return response()->json(['err' => $e], $e->getStatusCode ?? 500);
+        }
     }
 }
