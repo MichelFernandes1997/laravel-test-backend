@@ -66,7 +66,7 @@ class ImovelController extends Controller
         try {
             $newImovel = Imovel::create($request->toArray());
 
-            $data = ['message' => 'Confirmação de e-mail', 'emailToConfirm' => $newImovel->emailProprietario, 'id' => $newImovel->id];
+            $data = ['message' => 'Confirmação de e-mail', 'uri' => 'imovel', 'emailToConfirm' => $newImovel->emailProprietario, 'id' => $newImovel->id];
             
             Mail::to($newImovel->emailProprietario)->send(new VerifyEmail($data));
 

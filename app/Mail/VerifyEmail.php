@@ -30,6 +30,6 @@ class VerifyEmail extends Mailable
                     ->bcc($address, $name)
                     ->replyTo($address, $name)
                     ->subject($subject)
-                    ->with([ 'test_message' => $this->data['message'], 'emailToConfirm' => $this->data['emailToConfirm'], 'id' => $this->data['id']  ]);
+                    ->with([ 'test_message' => $this->data['message'], 'uri' => $this->data['uri'], 'emailToConfirm' => $this->data['emailToConfirm'], 'id' => $this->data['id']  ]);
     }
 }

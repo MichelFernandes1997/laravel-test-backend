@@ -31,8 +31,8 @@ class VerifiedEmail extends Controller
     public function verifyEmailProprietario(Request $request)
     {
         $imovel = Imovel::where('id', $request->id)->first();
-
-        if (hash('sha512', $contrato->emailProprietario) === $request->token) {
+        
+        if (hash('sha512', $imovel->emailProprietario) === $request->token) {
             $imovel->email_verified_at = Carbon::now()->toDateTimeString();
             
             $imovel->save();

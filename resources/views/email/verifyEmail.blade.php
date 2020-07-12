@@ -12,7 +12,7 @@
         <h2>Test Email</h2>
         <p>{{ $test_message }}</p>
             <p>
-                <a href="http://localhost/verify-email/contrato/?id={{$id}}&token={{hash('sha512', $emailToConfirm)}}" style="background-color:#ffbe00; color:#000000; display:inline-block; padding:12px 40px 12px 40px; text-align:center; text-decoration:none;" target="_blank" >
+                <a href="http://localhost/verify-email/{{$uri}}/?id={{$id}}&token={{hash('sha512', $emailToConfirm)}}" style="background-color:#ffbe00; color:#000000; display:inline-block; padding:12px 40px 12px 40px; text-align:center; text-decoration:none;" target="_blank" >
                     Verificar email agora
                 </a>
             </p>

@@ -45,7 +45,7 @@ class ContratoController extends Controller
 
             $imovel->save();
 
-            $data = ['message' => 'This is a test!', 'emailToConfirm' => $contrato->emailContratante, 'id' => $contrato->id];
+            $data = ['message' => 'This is a test!', 'uri' => 'contrato', 'emailToConfirm' => $contrato->emailContratante, 'id' => $contrato->id];
             
             Mail::to($contrato->emailContratante)->send(new VerifyEmail($data));
             
